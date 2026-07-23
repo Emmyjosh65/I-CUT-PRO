@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>I-CUT PRO — by Mega Sonic</title>
+<style>
+/* ===== RESET & BASE ===== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+--bg:#0b0b0f;--bg2:#12121a;--gold:#f5c842;--gold2:#e6b422;--purple:#8b5cf6;
+--purple2:#6d28d9;--purple3:#a78bfa;--glass:rgba(255,255,255,0.04);
+--glass2:rgba(255,255,255,0.07);--glass3:rgba(255,255,255,0.12);
+--border:rgba(255,255,255,0.08);--text:#f1f1f5;--text2:#a0a0b8;
+--shadow:0 8px 32px rgba(0,0,0,0.6);--radius:16px;--radius-sm:10px;
+--font:'Segoe UI',-apple-system,BlinkMacSystemFont,sans-serif;
+--transition:all 0.3s cubic-bezier(0.4,0,0.2,1)}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--font);background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--purple);border-radius:3px}
+a{color:var(--gold);text-decoration:none}
+button{cursor:pointer;font-family:var(--font);border:none;outline:none}
+input{font-family:var(--font);outline:none}
+h1,h2,h3,h4{font-weight:700;letter-spacing:-0.02em}
+
+/* ===== GLASS MIXIN ===== */
+.glass{background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--border);border-radius:var(--radius)}
+.glass-sm{background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:var(--radius-sm)}
+
+/* ===== PREMIUM BUTTONS ===== */
+.btn-gold{display:inline-flex;align-items:center;justify-content:center;gap:10px;
+background:linear-gradient(135deg,var(--gold),var(--gold2));color:#0b0b0f;
+padding:14px 36px;border-radius:50px;font-weight:700;font-size:1rem;
+box-shadow:0 0 30px rgba(245,200,66,0.3);transition:var(--transition);letter-spacing:0.3px}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 0 50px rgba(245,200,66,0.5)}
+.btn-gold:active{transform:scale(0.97)}
+.btn-purple{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+background:linear-gradient(135deg,var(--purple),var(--purple2));color:#fff;
+padding:12px 28px;border-radius:50px;font-weight:600;font-size:0.9rem;
+box-shadow:0 0 20px rgba(139,92,246,0.25);transition:var(--transition)}
+.btn-purple:hover{transform:translateY(-2px);box-shadow:0 0 35px rgba(139,92,246,0.4)}
+.btn-glass{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+background:var(--glass2);backdrop-filter:blur(10px);color:var(--text);
+padding:10px 22px;border-radius:50px;font-weight:500;font-size:0.85rem;
+border:1px solid var(--border);transition:var(--transition)}
+.btn-glass:hover{background:var(--glass3);transform:translateY(-1px)}
+
+/* ===== LOADING SCREEN ===== */
+#loader{position:fixed;inset:0;z-index:99999;background:var(--bg);
+display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
+.loader-ring{width:80px;height:80px;border-radius:50%;border:4px solid var(--border);
+border-top-color:var(--gold);border-right-color:var(--purple);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loader-text{font-size:1.1rem;color:var(--text2);letter-spacing:2px;text-transform:uppercase}
+.loader-bar{width:200px;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.loader-bar-fill{height:100%;width:0;background:linear-gradient(90deg,var(--purple),var(--gold));
+border-radius:2px;animation:loadBar 2s ease forwards}
+@keyframes loadBar{0%{width:0%}50%{width:65%}100%{width:100%}}
+
+/* ===== PARTICLES ===== */
+#particles-canvas{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* ===== PAGE SECTIONS ===== */
+.page{display:none;min-height:100vh;position:relative;z-index:1}
+.page.active{display:flex;flex-direction:column}
+
+/* ===== LANDING PAGE ===== */
+#landing{align-items:center;justify-content:center;text-align:center;padding:20px}
+.landing-bg{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.landing-bg .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.3;animation:orbFloat 20s ease-in-out infinite}
+.landing-bg .orb:nth-child(1){width:500px;height:500px;background:var(--purple);top:-10%;left:-10%;animation-delay:0s}
+.landing-bg .orb:nth-child(2){width:400px;height:400px;background:var(--gold);bottom:-10%;right:-10%;animation-delay:-7s}
+.landing-bg .orb:nth-child(3){width:350px;height:350px;background:var(--purple2);top:40%;left:50%;animation-delay:-14s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.1)}66%{transform:translate(-20px,40px) scale(0.9)}}
+
+.landing-content{position:relative;z-index:2;max-width:900px;padding:40px 20px}
+.landing-logo{font-size:4rem;font-weight:900;letter-spacing:-2px;background:linear-gradient(135deg,#fff 30%,var(--gold) 60%,var(--purple3));
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1}
+.landing-sub{font-size:1.2rem;color:var(--text2);margin-top:4px;letter-spacing:4px;text-transform:uppercase}
+.landing-desc{font-size:1.05rem;color:var(--text2);line-height:1.8;margin:30px auto;max-width:750px}
+.landing-desc span{color:var(--gold);font-weight:600}
+.feature-grid{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:30px 0 40px;max-width:700px;margin-left:auto;margin-right:auto}
+.feature-chip{background:var(--glass);backdrop-filter:blur(10px);border:1px solid var(--border);
+padding:8px 16px;border-radius:20px;font-size:0.78rem;color:var(--text2);transition:var(--transition)}
+.feature-chip:hover{background:var(--glass3);color:var(--gold);border-color:var(--gold);transform:translateY(-2px)}
+.landing-cta{margin-top:10px}
+
+/* ===== PREMIUM ACCESS PAGE ===== */
+#access{align-items:center;justify-content:center;padding:30px 20px;min-height:100vh}
+.access-card{width:100%;max-width:480px;padding:40px 32px;text-align:center}
+.access-card h2{font-size:1.8rem;margin-bottom:6px;color:var(--gold)}
+.access-card p{color:var(--text2);margin-bottom:24px;font-size:0.95rem}
+.access-input{width:100%;padding:16px 20px;background:var(--glass2);border:1px solid var(--border);
+border-radius:var(--radius-sm);color:var(--text);font-size:1rem;text-align:center;
+letter-spacing:2px;transition:var(--transition);margin-bottom:16px}
+.access-input:focus{border-color:var(--gold);box-shadow:0 0 20px rgba(245,200,66,0.15)}
+.access-error{color:#f87171;font-size:0.9rem;margin-top:8px;display:none;min-height:24px}
+.access-success{color:#34d399;font-size:0.9rem;margin-top:8px;display:none}
+
+/* ===== BUY SECTION ===== */
+.buy-section{margin-top:40px;padding-top:30px;border-top:1px solid var(--border)}
+.buy-section h3{font-size:1.3rem;color:var(--text);margin-bottom:6px}
+.buy-section>p{color:var(--text2);font-size:0.9rem;margin-bottom:20px}
+.plan-cards{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.plan-card{flex:1;min-width:180px;max-width:240px;padding:28px 20px;background:var(--glass);
+backdrop-filter:blur(14px);border:1px solid var(--border);border-radius:var(--radius);
+text-align:center;transition:var(--transition)}
+.plan-card:hover{transform:translateY(-4px);border-color:var(--gold);box-shadow:0 0 40px rgba(245,200,66,0.1)}
+.plan-card.popular{border-color:var(--gold);box-shadow:0 0 30px rgba(245,200,66,0.15)}
+.plan-card h4{font-size:1.2rem;color:var(--text);margin-bottom:4px}
+.plan-card .price{font-size:2.2rem;font-weight:900;color:var(--gold);margin:12px 0}
+.plan-card .price span{font-size:1rem;font-weight:400;color:var(--text2)}
+.plan-card .plan-desc{font-size:0.8rem;color:var(--text2);margin-bottom:18px;line-height:1.5}
+.payment-info{display:none;margin-top:20px;padding:24px;background:var(--glass2);
+backdrop-filter:blur(14px);border-radius:var(--radius);border:1px solid var(--gold);text-align:left}
+.payment-info.show{display:block;animation:fadeUp 0.4s ease}
+.payment-info h4{color:var(--gold);margin-bottom:12px;font-size:1rem}
+.payment-info .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.9rem}
+.payment-info .row span:last-child{color:var(--gold);font-weight:600;font-family:monospace}
+.payment-info .whatsapp-btn{margin-top:16px;width:100%}
+
+/* ===== ADMIN LOGIN ===== */
+.admin-login-section{margin-top:30px;padding-top:25px;border-top:1px solid var(--border)}
+.admin-login-toggle{background:none;color:var(--text2);font-size:0.85rem;cursor:pointer;opacity:0.6;transition:var(--transition)}
+.admin-login-toggle:hover{opacity:1;color:var(--gold)}
+.admin-login-form{display:none;margin-top:16px;max-width:320px;margin-left:auto;margin-right:auto}
+.admin-login-form.show{display:block;animation:fadeUp 0.3s ease}
+.admin-login-form input{width:100%;padding:14px 18px;background:var(--glass2);border:1px solid var(--border);
+border-radius:var(--radius-sm);color:var(--text);font-size:0.95rem;text-align:center;margin-bottom:12px}
+.admin-login-form input:focus{border-color:var(--purple);box-shadow:0 0 20px rgba(139,92,246,0.15)}
+
+/* ===== ADMIN DASHBOARD ===== */
+#admin-dash{padding:20px;min-height:100vh;overflow-y:auto}
+.admin-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:28px;padding:20px 24px}
+.admin-header h1{font-size:1.6rem;background:linear-gradient(135deg,var(--gold),var(--purple3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.admin-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:28px}
+.stat-card{padding:20px;text-align:center}
+.stat-card .num{font-size:2rem;font-weight:900;color:var(--gold)}
+.stat-card .label{font-size:0.8rem;color:var(--text2);margin-top:4px}
+.admin-generator{padding:24px;margin-bottom:28px}
+.admin-generator h3{color:var(--gold);margin-bottom:16px;font-size:1.1rem}
+.gen-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.gen-row input{flex:1;min-width:180px;padding:12px 16px;background:var(--glass2);border:1px solid var(--border);
+border-radius:var(--radius-sm);color:var(--text);font-size:0.9rem}
+.gen-row input:focus{border-color:var(--purple)}
+.gen-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.code-list{padding:20px;margin-top:20px}
+.code-list h3{color:var(--gold);margin-bottom:16px;font-size:1.1rem}
+.code-search{width:100%;padding:12px 16px;background:var(--glass2);border:1px solid var(--border);
+border-radius:var(--radius-sm);color:var(--text);font-size:0.9rem;margin-bottom:16px}
+.code-table{width:100%;border-collapse:collapse;font-size:0.85rem}
+.code-table th{text-align:left;padding:10px 8px;color:var(--text2);font-weight:600;border-bottom:1px solid var(--border)}
+.code-table td{padding:10px 8px;border-bottom:1px solid var(--border);color:var(--text)}
+.code-table .code-val{font-family:monospace;color:var(--gold);letter-spacing:1px}
+.code-table .status-active{color:#34d399}
+.code-table .status-disabled{color:#f87171}
+.code-table .actions{display:flex;gap:6px}
+.code-table .actions button{background:none;border:none;color:var(--text2);font-size:0.8rem;padding:4px 8px;border-radius:6px;transition:var(--transition)}
+.code-table .actions button:hover{background:var(--glass2);color:var(--gold)}
+.admin-logout{background:none;border:1px solid var(--border);color:var(--text2);padding:10px 20px;
+border-radius:50px;font-size:0.85rem;transition:var(--transition)}
+.admin-logout:hover{border-color:#f87171;color:#f87171}
+
+/* ===== MAIN EDITOR ===== */
+#editor{display:none;flex-direction:column;height:100vh;background:var(--bg);overflow:hidden}
+#editor.active{display:flex}
+.editor-top{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;
+background:var(--glass);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);z-index:10;flex-shrink:0}
+.editor-top .logo{font-size:1.2rem;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--purple3));
+-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.editor-top .top-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.editor-top .top-actions button{background:var(--glass2);border:1px solid var(--border);color:var(--text);
+padding:6px 14px;border-radius:8px;font-size:0.8rem;transition:var(--transition)}
+.editor-top .top-actions button:hover{background:var(--glass3);border-color:var(--gold)}
+.editor-body{display:flex;flex:1;overflow:hidden}
+
+/* Left Sidebar */
+.editor-sidebar{width:64px;background:var(--glass);backdrop-filter:blur(20px);border-right:1px solid var(--border);
+display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:2px;flex-shrink:0;overflow-y:auto}
+.editor-sidebar .sbtn{display:flex;flex-direction:column;align-items:center;justify-content:center;
+width:52px;height:52px;border-radius:12px;background:none;border:none;color:var(--text2);
+font-size:0.6rem;gap:3px;transition:var(--transition);position:relative}
+.editor-sidebar .sbtn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.editor-sidebar .sbtn:hover{background:var(--glass2);color:var(--text)}
+.editor-sidebar .sbtn.active{background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(245,200,66,0.1));color:var(--gold);border:1px solid rgba(245,200,66,0.2)}
+
+/* Center */
+.editor-center{flex:1;display:flex;flex-direction:column;min-width:0}
+.editor-preview{flex:1;display:flex;align-items:center;justify-content:center;background:#050508;position:relative;overflow:hidden}
+.editor-preview .preview-frame{width:80%;max-width:720px;aspect-ratio:16/9;background:#0f0f18;
+border-radius:12px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;
+color:var(--text2);font-size:0.9rem;position:relative;overflow:hidden}
+.preview-frame .play-btn{position:absolute;width:60px;height:60px;background:rgba(139,92,246,0.2);
+backdrop-filter:blur(10px);border-radius:50%;display:flex;align-items:center;justify-content:center;
+border:1px solid rgba(245,200,66,0.3);color:var(--gold);font-size:1.5rem;cursor:pointer;transition:var(--transition)}
+.preview-frame .play-btn:hover{background:rgba(139,92,246,0.3);transform:scale(1.05)}
+.preview-time{position:absolute;bottom:16px;right:20px;font-size:0.8rem;color:var(--text2);font-family:monospace}
+
+/* Timeline */
+.editor-timeline{height:200px;background:var(--glass);backdrop-filter:blur(20px);border-top:1px solid var(--border);
+display:flex;flex-direction:column;flex-shrink:0}
+.timeline-header{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;
+border-bottom:1px solid var(--border);flex-shrink:0}
+.timeline-header .left{display:flex;align-items:center;gap:8px}
+.timeline-header .left span{font-size:0.8rem;color:var(--text2)}
+.timeline-header .tbtn{background:var(--glass2);border:1px solid var(--border);color:var(--text2);
+padding:4px 10px;border-radius:6px;font-size:0.75rem;transition:var(--transition)}
+.timeline-header .tbtn:hover{background:var(--glass3);color:var(--text)}
+.timeline-tracks{flex:1;display:flex;flex-direction:column;padding:4px 8px;gap:4px;overflow-y:auto}
+.timeline-track{height:32px;background:var(--glass2);border-radius:6px;border:1px solid var(--border);
+display:flex;align-items:center;padding:0 12px;position:relative;cursor:pointer;transition:var(--transition)}
+.timeline-track:hover{border-color:rgba(139,92,246,0.3)}
+.timeline-track .clip{height:26px;background:linear-gradient(135deg,rgba(139,92,246,0.3),rgba(245,200,66,0.15));
+border-radius:4px;position:absolute;padding:0 10px;display:flex;align-items:center;font-size:0.7rem;
+color:var(--text);border:1px solid rgba(245,200,66,0.2);cursor:grab;white-space:nowrap}
+.timeline-track .track-label{font-size:0.7rem;color:var(--text2);width:50px;flex-shrink:0}
+.timeline-ruler{height:20px;border-bottom:1px solid var(--border);display:flex;align-items:center;
+padding:0 16px;position:relative;flex-shrink:0}
+.timeline-ruler .marker{position:absolute;height:100%;width:1px;background:var(--gold);top:0;left:30%;pointer-events:none}
+.timeline-ruler .marker::after{content:'';position:absolute;top:0;left:-4px;width:9px;height:9px;
+background:var(--gold);border-radius:50%;box-shadow:0 0 10px rgba(245,200,66,0.5)}
+
+/* Right Panel */
+.editor-props{width:280px;background:var(--glass);backdrop-filter:blur(20px);border-left:1px solid var(--border);
+padding:12px;overflow-y:auto;flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+.editor-props h4{font-size:0.85rem;color:var(--gold);margin-bottom:8px;font-weight:600}
+.prop-group{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.prop-row{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.prop-row label{font-size:0.75rem;color:var(--text2);min-width:50px}
+.prop-row input[type="range"]{flex:1;-webkit-appearance:none;height:3px;background:var(--border);
+border-radius:2px;transition:var(--transition)}
+.prop-row input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;
+background:var(--gold);border-radius:50%;cursor:pointer;box-shadow:0 0 10px rgba(245,200,66,0.3)}
+.prop-row .val{font-size:0.75rem;color:var(--gold);min-width:30px;text-align:right;font-family:monospace}
+.prop-divider{height:1px;background:var(--border);margin:4px 0}
+
+/* AI Panel */
+.ai-panel{display:none;flex-direction:column;gap:10px}
+.ai-panel.show{display:flex}
+.ai-panel .ai-btn{background:var(--glass2);border:1px solid var(--border);color:var(--text);
+padding:10px 14px;border-radius:10px;font-size:0.8rem;text-align:left;transition:var(--transition)}
+.ai-panel .ai-btn:hover{background:linear-gradient(135deg,rgba(139,92,246,0.2),rgba(245,200,66,0.1));
+border-color:var(--gold);transform:translateX(4px)}
+.ai-panel .ai-btn .badge{float:right;background:linear-gradient(135deg,var(--purple),var(--gold));
+color:#000;padding:1px 8px;border-radius:10px;font-size:0.65rem;font-weight:700}
+
+/* Export Modal */
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.7);
+backdrop-filter:blur(8px);display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.show{display:flex}
+.modal-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);
+padding:32px;max-width:460px;width:100%;max-height:80vh;overflow-y:auto}
+.modal-box h2{font-size:1.4rem;color:var(--gold);margin-bottom:4px}
+.modal-box .sub{color:var(--text2);font-size:0.85rem;margin-bottom:20px}
+.export-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.export-opt{padding:14px;background:var(--glass);border:1px solid var(--border);border-radius:var(--radius-sm);
+text-align:center;cursor:pointer;transition:var(--transition)}
+.export-opt:hover{border-color:var(--gold);background:var(--glass3)}
+.export-opt.selected{border-color:var(--gold);box-shadow:0 0 20px rgba(245,200,66,0.15)}
+.export-opt .title{font-size:0.95rem;font-weight:700;color:var(--text)}
+.export-opt .desc{font-size:0.7rem;color:var(--text2);margin-top:2px}
+.export-opt .res{font-size:0.7rem;color:var(--purple3);margin-top:4px}
+.modal-actions{display:flex;gap:10px;margin-top:16px}
+.modal-actions button{flex:1;padding:12px;border-radius:var(--radius-sm);font-weight:600;font-size:0.9rem}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(245,200,66,0.2)}50%{box-shadow:0 0 40px rgba(245,200,66,0.5)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+.fade-up{animation:fadeUp 0.6s ease forwards}
+.fade-in{animation:fadeIn 0.6s ease forwards}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:900px){
+.editor-sidebar{width:56px}
+.editor-sidebar .sbtn{width:44px;height:44px;font-size:0.55rem}
+.editor-sidebar .sbtn svg{width:17px;height:17px}
+.editor-props{width:220px}
+.editor-timeline{height:150px}
+.landing-logo{font-size:2.8rem}
+}
+@media(max-width:640px){
+.editor-body{flex-direction:column}
+.editor-sidebar{width:100%;flex-direction:row;height:54px;overflow-x:auto;padding:4px 6px;border-right:none;border-bottom:1px solid var(--border)}
+.editor-sidebar .sbtn{width:48px;height:42px;flex-shrink:0}
+.editor-center{flex:1;min-height:0}
+.editor-preview{min-height:200px}
+.editor-preview .preview-frame{width:92%}
+.editor-timeline{height:120px}
+.editor-props{width:100%;height:180px;border-left:none;border-top:1px solid var(--border);flex-shrink:0}
+.landing-logo{font-size:2rem}
+.landing-sub{font-size:0.9rem}
+.landing-desc{font-size:0.9rem}
+.access-card{padding:28px 18px}
+.plan-cards{flex-direction:column;align-items:center}
+.plan-card{max-width:280px;width:100%}
+.admin-stats{grid-template-columns:1fr 1fr}
+.modal-box{padding:20px}
+.export-grid{grid-template-columns:1fr}
+.editor-top .top-actions button{padding:4px 10px;font-size:0.7rem}
+.code-table{font-size:0.75rem}
+.admin-header{flex-direction:column;align-items:flex-start}
+}
+
+/* ===== UTILITY ===== */
+.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}.mt-20{margin-top:20px}
+.mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}.mb-16{margin-bottom:16px}
+.text-gold{color:var(--gold)}.text-purple{color:var(--purple3)}.text-muted{color:var(--text2)}
+.flex{display:flex}.flex-center{align-items:center;justify-content:center}.gap-8{gap:8px}.gap-12{gap:12px}
+.w-full{width:100%}
+</style>
+</head>
+<body>
+
+<!-- ===== LOADER ===== -->
+<div id="loader">
+<div class="loader-ring"></div>
+<div class="loader-text">Loading I-CUT PRO</div>
+<div class="loader-bar"><div class="loader-bar-fill"></div></div>
+</div>
+
+<!-- ===== PARTICLES ===== -->
+<canvas id="particles-canvas"></canvas>
+
+<!-- ===== LANDING PAGE ===== -->
+<section id="landing" class="page active">
+<div class="landing-bg">
+<div class="orb"></div><div class="orb"></div><div class="orb"></div>
+</div>
+<div class="landing-content">
+<div class="fade-up" style="animation-delay:0.1s">
+<div class="landing-logo">I-CUT PRO</div>
+<div class="landing-sub">by Mega Sonic</div>
+</div>
+<p class="landing-desc fade-up" style="animation-delay:0.3s">
+<span>I-CUT PRO</span> is a revolutionary <span>AI-powered</span> video editing platform that merges the most powerful capabilities of <span>CapCut</span>, <span>Adobe After Effects</span>, <span>Premiere Pro</span>, <span>Alight Motion</span>, <span>DaVinci Resolve</span>, and <span>Canva Video</span> into one seamless, premium experience. Engineered for professionals and creators who demand the best, I-CUT PRO delivers <span>cinematic-grade editing</span> with the intelligence of artificial intelligence. From <span>AI background removal</span> to <span>real-time motion tracking</span>, <span>automatic captions</span>, <span>keyframe animations</span>, <span>chroma key compositing</span>, and <span>3D camera tracking</span> — every tool is at your fingertips. Experience <span>AI voice generation</span>, <span>AI music composition</span>, <span>AI image generation</span>, and even <span>AI video generation</span> directly in your timeline. Master <span>color grading</span> with full <span>LUT support</span>, create stunning <span>speed ramps</span> and <span>slow motion</span> sequences, reverse clips, upscale footage with <span>AI upscaling</span>, stabilize shaky shots, enhance faces, and export up to <span>8K resolution</span>. The professional <span>multi-layer timeline</span> with unlimited tracks, <span>cloud sync</span>, <span>auto save</span>, and a massive library of <span>premium assets</span>, stickers, fonts, and templates makes this the <span>ultimate creative powerhouse</span>. Whether you're editing a Hollywood film, a TikTok viral video, or a corporate presentation, <span>I-CUT PRO</span> is your all-in-one studio.
+</p>
+<div class="feature-grid fade-up" style="animation-delay:0.5s">
+<span class="feature-chip">AI Video Editing</span><span class="feature-chip">AI Background Removal</span>
+<span class="feature-chip">Auto Captions</span><span class="feature-chip">Motion Tracking</span>
+<span class="feature-chip">Keyframes</span><span class="feature-chip">Masking</span>
+<span class="feature-chip">Chroma Key</span><span class="feature-chip">Video Effects</span>
+<span class="feature-chip">Text Animations</span><span class="feature-chip">3D Camera</span>
+<span class="feature-chip">AI Voice Generator</span><span class="feature-chip">AI Music</span>
+<span class="feature-chip">AI Image Generator</span><span class="feature-chip">AI Video Generator</span>
+<span class="feature-chip">Green Screen</span><span class="feature-chip">Blur Effects</span>
+<span class="feature-chip">Color Grading</span><span class="feature-chip">LUT Support</span>
+<span class="feature-chip">Speed Ramp</span><span class="feature-chip">Slow Motion</span>
+<span class="feature-chip">Reverse Video</span><span class="feature-chip">AI Upscaling</span>
+<span class="feature-chip">Video Stabilization</span><span class="feature-chip">Face Enhancement</span>
+<span class="feature-chip">Export up to 8K</span><span class="feature-chip">Professional Timeline</span>
+<span class="feature-chip">Multi-layer Editing</span><span class="feature-chip">Unlimited Projects</span>
+<span class="feature-chip">Cloud Sync</span><span class="feature-chip">Auto Save</span>
+<span class="feature-chip">Premium Assets</span><span class="feature-chip">Stickers</span>
+<span class="feature-chip">Fonts</span><span class="feature-chip">Templates</span>
+<span class="feature-chip">Audio Editing</span><span class="feature-chip">Screen Recorder</span>
+<span class="feature-chip">AI Script Writer</span>
+</div>
+<div class="landing-cta fade-up" style="animation-delay:0.7s">
+<button class="btn-gold" onclick="showAccess()">✦ GET STARTED ✦</button>
+</div>
+</div>
+</section>
+
+<!-- ===== PREMIUM ACCESS PAGE ===== -->
+<section id="access" class="page">
+<div class="access-card glass">
+<h2>✦ Premium Access</h2>
+<p>Enter your premium code to unlock I-CUT PRO</p>
+<input type="text" id="codeInput" class="access-input" placeholder="XXXX-XXXX-XXXX" maxlength="19" autocomplete="off">
+<button class="btn-gold w-full" onclick="verifyCode()">✦ VERIFY CODE</button>
+<div id="accessError" class="access-error"></div>
+<div id="accessSuccess" class="access-success">✓ Code verified! Loading editor...</div>
+
+<div class="buy-section" id="buySection">
+<h3>✦ Don't have a code?</h3>
+<p>Purchase premium access below</p>
+<div class="plan-cards">
+<div class="plan-card">
+<h4>Monthly Plan</h4>
+<div class="price">₦1,000<span></span></div>
+<p class="plan-desc">Full access for 30 days. All premium features unlocked.</p>
+<button class="btn-purple" onclick="showPayment('Monthly')">Buy Now</button>
+</div>
+<div class="plan-card popular">
+<h4>Lifetime Plan</h4>
+<div class="price">₦3,000<span></span></div>
+<p class="plan-desc">One-time payment. Lifetime access. All future updates included.</p>
+<button class="btn-gold" onclick="showPayment('Lifetime')">Buy Now</button>
+</div>
+</div>
+<div id="paymentInfo" class="payment-info">
+<h4>✦ Payment Instructions</h4>
+<div class="row"><span>Bank / MoMo</span><span>MoMo (MTN)</span></div>
+<div class="row"><span>Account Number</span><span>8164667198</span></div>
+<div class="row"><span>Amount</span><span id="payAmount">₦1,000</span></div>
+<div class="row"><span>Plan</span><span id="payPlan">Monthly</span></div>
+<p style="margin-top:14px;font-size:0.85rem;color:var(--text2);line-height:1.6">
+After payment, send your payment screenshot to the number below to receive your premium code within 5 minutes.
+</p>
+<a href="https://wa.me/2348159226144" target="_blank" class="btn-gold whatsapp-btn" style="text-decoration:none">
+💬 Send via WhatsApp
+</a>
+</div>
+
+<div class="admin-login-section">
+<button class="admin-login-toggle" onclick="toggleAdminLogin()">Admin Login</button>
+<div class="admin-login-form" id="adminLoginForm">
+<input type="password" id="adminPass" placeholder="Enter Admin Code" onkeydown="if(event.key==='Enter')verifyAdmin()">
+<button class="btn-purple w-full" onclick="verifyAdmin()">Access Dashboard</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ===== ADMIN DASHBOARD ===== -->
+<section id="admin-dash" class="page">
+<div class="admin-header glass">
+<div>
+<h1>✦ Admin Dashboard</h1>
+<p style="color:var(--text2);font-size:0.85rem">I-CUT PRO Premium Code Management</p>
+</div>
+<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+<button class="btn-glass" onclick="exportAllCodes()">📥 Export</button>
+<button class="admin-logout" onclick="logoutAdmin()">Logout</button>
+</div>
+</div>
+<div class="admin-stats">
+<div class="stat-card glass"><div class="num" id="statTotal">0</div><div class="label">Total Codes</div></div>
+<div class="stat-card glass"><div class="num" id="statActive">0</div><div class="label">Active Users</div></div>
+<div class="stat-card glass"><div class="num" id="statLifetime">0</div><div class="label">Lifetime</div></div>
+<div class="stat-card glass"><div class="num" id="statMonthly">0</div><div class="label">Monthly</div></div>
+</div>
+<div class="admin-generator glass">
+<h3>✦ Generate Premium Code</h3>
+<div class="gen-row">
+<input type="text" id="customCodePrefix" placeholder="Custom prefix (e.g. ICUT-PREMIUM) or leave random" style="flex:2">
+<button class="btn-gold" onclick="generateCode()">✦ Generate</button>
+</div>
+<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap" class="gen-actions">
+<button class="btn-glass" onclick="generateCodeWithPrefix('ICUT')">ICUT-XXXX</button>
+<button class="btn-glass" onclick="generateCodeWithPrefix('ICUT-PREMIUM')">ICUT-PREMIUM</button>
+<button class="btn-glass" onclick="generateCodeWithPrefix('ICUT-GOLD')">ICUT-GOLD</button>
+<button class="btn-purple" onclick="generateBulk()">✦ Bulk (5)</button>
+</div>
+</div>
+<div class="code-list glass">
+<h3>✦ Generated Codes</h3>
+<input type="text" class="code-search" placeholder="Search codes..." id="codeSearch" oninput="renderCodeTable()">
+<div style="overflow-x:auto">
+<table class="code-table">
+<thead><tr><th>Code</th><th>Status</th><th>Plan</th><th>Created</th><th>Actions</th></tr></thead>
+<tbody id="codeTableBody"></tbody>
+</table>
+</div>
+</div>
+</section>
+
+<!-- ===== MAIN EDITOR ===== -->
+<div id="editor">
+<div class="editor-top">
+<div class="logo">✦ I-CUT PRO</div>
+<div class="top-actions">
+<button onclick="showExportModal()">📤 Export</button>
+<button onclick="showAIPanel()">🤖 AI</button>
+<button onclick="saveProject()">💾 Save</button>
+<button onclick="logoutEditor()">✕ Exit</button>
+</div>
+</div>
+<div class="editor-body">
+<!-- Left Sidebar -->
+<div class="editor-sidebar" id="editorSidebar"></div>
+<!-- Center -->
+<div class="editor-center">
+<div class="editor-preview">
+<div class="preview-frame">
+<div class="play-btn">▶</div>
+<div class="preview-time">00:00:00 / 00:00:00</div>
+</div>
+</div>
+<div class="editor-timeline">
+<div class="timeline-header">
+<div class="left">
+<span>Timeline</span>
+<button class="tbtn" onclick="addTrack()">+ Track</button>
+<button class="tbtn" onclick="alert('Split tool ready')">✂ Split</button>
+<button class="tbtn" onclick="alert('Clip duplicated')">⊞ Duplicate</button>
+</div>
+<div class="left">
+<button class="tbtn">🔍 +</button>
+<button class="tbtn">🔍 −</button>
+<button class="tbtn">🏷 Markers</button>
+</div>
+</div>
+<div class="timeline-ruler">
+<span style="font-size:0.65rem;color:var(--text2);position:absolute;left:16px">00:00</span>
+<span style="font-size:0.65rem;color:var(--text2);position:absolute;left:30%">00:05</span>
+<span style="font-size:0.65rem;color:var(--text2);position:absolute;left:60%">00:10</span>
+<span style="font-size:0.65rem;color:var(--text2);position:absolute;left:85%">00:15</span>
+<div class="marker" style="left:30%"></div>
+</div>
+<div class="timeline-tracks" id="timelineTracks"></div>
+</div>
+</div>
+<!-- Right Properties -->
+<div class="editor-props" id="editorProps">
+<h4>✦ Properties</h4>
+<div class="prop-group">
+<div class="prop-row"><label>Opacity</label><input type="range" min="0" max="100" value="100" oninput="this.nextElementSibling.textContent=this.value+'%'"><span class="val">100%</span></div>
+<div class="prop-row"><label>Scale</label><input type="range" min="1" max="200" value="100" oninput="this.nextElementSibling.textContent=this.value+'%'"><span class="val">100%</span></div>
+<div class="prop-row"><label>Rotation</label><input type="range" min="0" max="360" value="0" oninput="this.nextElementSibling.textContent=this.value+'°'"><span class="val">0°</span></div>
+<div class="prop-row"><label>Blur</label><input type="range" min="0" max="50" value="0" oninput="this.nextElementSibling.textContent=this.value+'px'"><span class="val">0px</span></div>
+</div>
+<div class="prop-divider"></div>
+<div class="prop-group">
+<div class="prop-row"><label>Position X</label><input type="range" min="-500" max="500" value="0"><span class="val">0</span></div>
+<div class="prop-row"><label>Position Y</label><input type="range" min="-500" max="500" value="0"><span class="val">0</span></div>
+</div>
+<div class="prop-divider"></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+<button class="btn-glass" style="flex:1;font-size:0.7rem;padding:6px">Mask</button>
+<button class="btn-glass" style="flex:1;font-size:0.7rem;padding:6px">Shadow</button>
+<button class="btn-glass" style="flex:1;font-size:0.7rem;padding:6px">Glow</button>
+<button class="btn-glass" style="flex:1;font-size:0.7rem;padding:6px">Color</button>
+</div>
+<div class="prop-divider"></div>
+<div id="aiPanel" class="ai-panel">
+<h4>✦ AI Tools</h4>
+<button class="ai-btn" onclick="alert('AI Background Removal processing...')">🖼 Remove Background <span class="badge">AI</span></button>
+<button class="ai-btn" onclick="alert('AI Enhancement applied')">✨ AI Enhance <span class="badge">AI</span></button>
+<button class="ai-btn" onclick="alert('AI Upscaling...')">🔍 AI Upscale <span class="badge">AI</span></button>
+<button class="ai-btn" onclick="alert('Auto subtitles generated')">💬 Auto Subtitles <span class="badge">AI</span></button>
+<button class="ai-btn" onclick="alert('AI Voice generating...')">🎙 AI Voice <span class="badge">AI</span></button>
+<button class="ai-btn" onclick="alert('AI Image generated')">🖼 AI Image Generator <span class="badge">AI</span></button>
+<button class="ai-btn" onclick="alert('AI Video generating...')">🎬 AI Video Generator <span class="badge">AI</span></button>
+<button class="ai-btn" onclick="alert('AI Script Writer ready')">✍ AI Script Writer <span class="badge">AI</span></button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ===== EXPORT MODAL ===== -->
+<div class="modal-overlay" id="exportModal">
+<div class="modal-box">
+<h2>✦ Export Video</h2>
+<p class="sub">Choose your export resolution and format</p>
+<div class="export-grid" id="exportGrid">
+<div class="export-opt selected" onclick="selectExport(this)" data-res="720p" data-fmt="MP4">
+<div class="title">720p</div>
+<div class="desc">HD Ready</div>
+<div class="res">MP4</div>
+</div>
+<div class="export-opt" onclick="selectExport(this)" data-res="1080p" data-fmt="MP4">
+<div class="title">1080p</div>
+<div class="desc">Full HD</div>
+<div class="res">MP4</div>
+</div>
+<div class="export-opt" onclick="selectExport(this)" data-res="2K" data-fmt="MP4">
+<div class="title">2K</div>
+<div class="desc">QHD</div>
+<div class="res">MP4</div>
+</div>
+<div class="export-opt" onclick="selectExport(this)" data-res="4K" data-fmt="MP4">
+<div class="title">4K</div>
+<div class="desc">Ultra HD</div>
+<div class="res">MP4</div>
+</div>
+<div class="export-opt" onclick="selectExport(this)" data-res="8K" data-fmt="MP4">
+<div class="title">8K</div>
+<div class="desc">Full Ultra HD</div>
+<div class="res">MP4</div>
+</div>
+<div class="export-opt" onclick="selectExport(this)" data-res="1080p" data-fmt="MOV">
+<div class="title">MOV</div>
+<div class="desc">ProRes</div>
+<div class="res">1080p</div>
+</div>
+<div class="export-opt" onclick="selectExport(this)" data-res="720p" data-fmt="GIF">
+<div class="title">GIF</div>
+<div class="desc">Animated</div>
+<div class="res">720p</div>
+</div>
+<div class="export-opt" onclick="selectExport(this)" data-res="1080p" data-fmt="WebM">
+<div class="title">WebM</div>
+<div class="desc">Web Optimized</div>
+<div class="res">1080p</div>
+</div>
+</div>
+<div class="modal-actions">
+<button class="btn-glass" onclick="closeExportModal()">Cancel</button>
+<button class="btn-gold" onclick="startExport()">✦ Export Now</button>
+</div>
+</div>
+</div>
+
+<script>
+/* ==============================================
+   I-CUT PRO — Main Application Script
+   ============================================== */
+
+// ---- Loader ----
+window.addEventListener('load',()=>{
+setTimeout(()=>{
+document.getElementById('loader').style.opacity='0';
+document.getElementById('loader').style.transition='opacity 0.6s';
+setTimeout(()=>{
+document.getElementById('loader').style.display='none';
+initParticles();
+if(localStorage.getItem('icut_pro_activated')==='true'){
+showEditor();
+} else {
+showLanding();
+}
+},600);
+},2000);
+});
+
+// ---- Navigation ----
+function showPage(id){
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+}
+function showLanding(){showPage('landing');document.getElementById('editor').classList.remove('active')}
+function showAccess(){
+showPage('access');
+document.getElementById('codeInput').focus();
+}
+
+// ---- Particles ----
+function initParticles(){
+const c=document.getElementById('particles-canvas');
+const ctx=c.getContext('2d');
+let w,h;
+function resize(){w=c.width=window.innerWidth;h=c.height=window.innerHeight}
+resize();window.addEventListener('resize',resize);
+const particles=[];
+const count=Math.min(80,Math.floor(w*h/15000));
+for(let i=0;i<count;i++){
+particles.push({
+x:Math.random()*w,y:Math.random()*h,
+vx:(Math.random()-0.5)*0.5,vy:(Math.random()-0.5)*0.5,
+r:Math.random()*2+0.5,o:Math.random()*0.5+0.1
+});
+}
+function anim(){
+ctx.clearRect(0,0,w,h);
+for(let p of particles){
+p.x+=p.vx;p.y+=p.vy;
+if(p.x<0||p.x>w)p.vx*=-1;
+if(p.y<0||p.y>h)p.vy*=-1;
+ctx.beginPath();
+ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+ctx.fillStyle=`rgba(245,200,66,${p.o})`;
+ctx.fill();
+}
+// connections
+for(let i=0;i<particles.length;i++){
+for(let j=i+1;j<particles.length;j++){
+const dx=particles[i].x-particles[j].x;
+const dy=particles[i].y-particles[j].y;
+const dist=Math.sqrt(dx*dx+dy*dy);
+if(dist<120){
+ctx.beginPath();
+ctx.moveTo(particles[i].x,particles[i].y);
+ctx.lineTo(particles[j].x,particles[j].y);
+ctx.strokeStyle=`rgba(139,92,246,${0.08*(1-dist/120)})`;
+ctx.lineWidth=0.5;
+ctx.stroke();
+}
+}
+}
+requestAnimationFrame(anim);
+}
+anim();
+}
+
+// ---- Code System ----
+function getCodes(){try{return JSON.parse(localStorage.getItem('icut_codes'))||[]}catch{return[]}}
+function setCodes(c){localStorage.setItem('icut_codes',JSON.stringify(c))}
+
+function generateRandomCode(prefix){
+const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+const rand=(n)=>{let r='';for(let i=0;i<n;i++)r+=chars[Math.floor(Math.random()*chars.length)];return r};
+if(prefix) return prefix.toUpperCase()+'-'+rand(4)+'-'+rand(4);
+return 'ICUT-'+rand(4)+'-'+rand(4)+'-'+rand(2);
+}
+
+function generateCodeWithPrefix(p){
+document.getElementById('customCodePrefix').value=p;
+generateCode();
+}
+
+function generateCode(){
+const prefix=document.getElementById('customCodePrefix').value.trim().toUpperCase();
+const code=generateRandomCode(prefix||'');
+const codes=getCodes();
+const now=new Date();
+codes.push({
+code:code,
+status:'active',
+plan:'Lifetime',
+created:now.toISOString().split('T')[0],
+createdFull:now.toISOString()
+});
+setCodes(codes);
+document.getElementById('customCodePrefix').value='';
+renderCodeTable();
+updateAdminStats();
+alert('✦ Code generated: '+code);
+}
+
+function generateBulk(){
+for(let i=0;i<5;i++)setTimeout(()=>generateCode(),i*80);
+}
+
+function verifyCode(){
+const input=document.getElementById('codeInput').value.trim().toUpperCase();
+const err=document.getElementById('accessError');
+const suc=document.getElementById('accessSuccess');
+err.style.display='none';suc.style.display='none';
+if(!input){err.textContent='Please enter a premium code.';err.style.display='block';return}
+const codes=getCodes();
+const found=codes.find(c=>c.code===input);
+if(found&&found.status==='active'){
+localStorage.setItem('icut_pro_activated','true');
+suc.style.display='block';
+setTimeout(()=>showEditor(),800);
+} else {
+err.textContent='Premium code not found.';
+err.style.display='block';
+}
+}
+
+// ---- Payment ----
+let selectedPlan='Monthly';
+function showPayment(plan){
+selectedPlan=plan;
+const p=document.getElementById('paymentInfo');
+document.getElementById('payAmount').textContent=plan==='Monthly'?'₦1,000':'₦3,000';
+document.getElementById('payPlan').textContent=plan;
+p.classList.add('show');
+p.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+// ---- Admin ----
+function toggleAdminLogin(){
+const f=document.getElementById('adminLoginForm');
+f.classList.toggle('show');
+if(f.classList.contains('show'))document.getElementById('adminPass').focus();
+}
+
+function verifyAdmin(){
+const pass=document.getElementById('adminPass').value.trim();
+if(pass==='VICTOR-GOAT'){
+showPage('admin-dash');
+renderCodeTable();
+updateAdminStats();
+document.getElementById('adminPass').value='';
+} else {
+alert('Incorrect admin code.');
+}
+}
+
+function logoutAdmin(){
+showPage('access');
+document.querySelectorAll('.page').forEach(p=>{if(p.id!=='access'&&p.id!=='landing')p.classList.remove('active')});
+document.getElementById('landing').classList.remove('active');
+document.getElementById('access').classList.add('active');
+}
+
+function updateAdminStats(){
+const codes=getCodes();
+const total=codes.length;
+const active=codes.filter(c=>c.status==='active').length;
+const lifetime=codes.filter(c=>c.plan==='Lifetime'&&c.status==='active').length;
+const monthly=codes.filter(c=>c.plan==='Monthly'&&c.status==='active').length;
+document.getElementById('statTotal').textContent=total;
+document.getElementById('statActive').textContent=active;
+document.getElementById('statLifetime').textContent=lifetime;
+document.getElementById('statMonthly').textContent=monthly;
+}
+
+function renderCodeTable(){
+const codes=getCodes();
+const search=document.getElementById('codeSearch').value.toUpperCase();
+const filtered=codes.filter(c=>c.code.includes(search));
+const tbody=document.getElementById('codeTableBody');
+tbody.innerHTML='';
+filtered.slice().reverse().forEach(c=>{
+const tr=document.createElement('tr');
+const isActive=c.status==='active';
+tr.innerHTML=`
+<td class="code-val">${c.code}</td>
+<td class="${isActive?'status-active':'status-disabled'}">${isActive?'● Active':'● Disabled'}</td>
+<td>${c.plan||'Lifetime'}</td>
+<td>${c.created||'N/A'}</td>
+<td class="actions">
+<button onclick="copyCode('${c.code}')" title="Copy">📋</button>
+${isActive?`<button onclick="toggleCodeStatus('${c.code}')" title="Disable">🚫</button>`:`<button onclick="toggleCodeStatus('${c.code}')" title="Enable">✅</button>`}
+<button onclick="deleteCode('${c.code}')" title="Delete">🗑</button>
+</td>`;
+tbody.appendChild(tr);
+});
+updateAdminStats();
+}
+
+function copyCode(code){
+navigator.clipboard.writeText(code).then(()=>{
+alert('✦ Code copied: '+code);
+}).catch(()=>{
+// fallback
+const ta=document.createElement('textarea');
+ta.value=code;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
+alert('✦ Code copied: '+code);
+});
+}
+
+function toggleCodeStatus(code){
+const codes=getCodes();
+const c=codes.find(x=>x.code===code);
+if(c){c.status=c.status==='active'?'disabled':'active';setCodes(codes);renderCodeTable()}
+}
+
+function deleteCode(code){
+if(!confirm('Delete code '+code+'?'))return;
+const codes=getCodes().filter(c=>c.code!==code);
+setCodes(codes);
+renderCodeTable();
+}
+
+function exportAllCodes(){
+const codes=getCodes();
+let text='I-CUT PRO — Premium Codes Export\n';
+text+='Generated: '+new Date().toISOString()+'\n';
+text+='Total: '+codes.length+'\n';
+text+='Active: '+codes.filter(c=>c.status==='active').length+'\n';
+text+='━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n';
+codes.forEach((c,i)=>{
+text+=`${i+1}. ${c.code} | ${c.status} | ${c.plan||'Lifetime'} | ${c.created||'N/A'}\n`;
+});
+const blob=new Blob([text],{type:'text/plain'});
+const a=document.createElement('a');
+a.href=URL.createObjectURL(blob);
+a.download='ICUT-PRO-Codes-'+new Date().toISOString().split('T')[0]+'.txt';
+a.click();
+URL.revokeObjectURL(a.href);
+}
+
+// ---- Editor ----
+function showEditor(){
+document.getElementById('editor').classList.add('active');
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+buildSidebar();
+buildTimeline();
+}
+
+function logoutEditor(){
+if(confirm('Exit editor? Your project is saved locally.')){
+document.getElementById('editor').classList.remove('active');
+showLanding();
+}
+}
+
+function buildSidebar(){
+const sb=document.getElementById('editorSidebar');
+const items=[
+{icon:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>',label:'Media'},
+{icon:'<svg viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',label:'Audio'},
+{icon:'<svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>',label:'Text'},
+{icon:'<svg viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',label:'Stickers'},
+{icon:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 2v20M2 12h20"/></svg>',label:'Effects'},
+{icon:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/></svg>',label:'Filters'},
+{icon:'<svg viewBox="0 0 24 24"><polygon points="22 3 22 15 16 15 16 21 2 21 2 3"/></svg>',label:'AI'},
+{icon:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>',label:'Templates'},
+{icon:'<svg viewBox="0 0 24 24"><line x1="12" y1="2" x2="12" y2="22"/><path d="M4 7l8-5 8 5"/></svg>',label:'Adjust'},
+{icon:'<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',label:'Speed'},
+{icon:'<svg viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>',label:'Animate'},
+{icon:'<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',label:'Export'}
+];
+sb.innerHTML=items.map((item,i)=>`
+<button class="sbtn ${i===0?'active':''}" onclick="selectSidebar(this,'${item.label}')">
+${item.icon}
+<span>${item.label}</span>
+</button>
+`).join('');
+}
+
+function selectSidebar(el,label){
+document.querySelectorAll('.sbtn').forEach(b=>b.classList.remove('active'));
+el.classList.add('active');
+if(label==='AI'){
+document.getElementById('aiPanel').classList.add('show');
+} else if(label==='Export'){
+showExportModal();
+} else {
+document.getElementById('aiPanel').classList.remove('show');
+}
+}
+
+function buildTimeline(){
+const tracks=document.getElementById('timelineTracks');
+tracks.innerHTML='';
+const labels=['Video 1','Video 2','Audio 1','Text','Overlay'];
+labels.forEach((label,i)=>{
+const tr=document.createElement('div');
+tr.className='timeline-track';
+tr.innerHTML=`<span class="track-label">${label}</span>`;
+if(i<2){
+const clip=document.createElement('div');
+clip.className='clip';
+clip.style.left=60+'px';
+clip.style.width=Math.floor(100+Math.random()*150)+'px';
+clip.textContent='Clip '+(i+1);
+tr.appendChild(clip);
+}
+tracks.appendChild(tr);
+});
+}
+
+function addTrack(){
+const tracks=document.getElementById('timelineTracks');
+const tr=document.createElement('div');
+tr.className='timeline-track';
+tr.innerHTML=`<span class="track-label">Track ${tracks.children.length+1}</span>`;
+tracks.appendChild(tr);
+}
+
+function saveProject(){
+localStorage.setItem('icut_project_state','saved_'+Date.now());
+alert('✦ Project saved locally!');
+}
+
+// ---- Export ----
+let selectedExportEl=null;
+function showExportModal(){
+document.getElementById('exportModal').classList.add('show');
+selectedExportEl=document.querySelector('.export-opt');
+}
+
+function closeExportModal(){
+document.getElementById('exportModal').classList.remove('show');
+}
+
+function selectExport(el){
+document.querySelectorAll('.export-opt').forEach(e=>e.classList.remove('selected'));
+el.classList.add('selected');
+selectedExportEl=el;
+}
+
+function startExport(){
+if(!selectedExportEl)selectedExportEl=document.querySelector('.export-opt.selected');
+const res=selectedExportEl.dataset.res||'1080p';
+const fmt=selectedExportEl.dataset.fmt||'MP4';
+closeExportModal();
+alert(`✦ Exporting to ${res} ${fmt}...\n\nYour video is being rendered. You will be notified when complete.`);
+}
+
+// ---- AI Panel Toggle ----
+function showAIPanel(){
+document.getElementById('aiPanel').classList.toggle('show');
+document.querySelectorAll('.sbtn').forEach(b=>b.classList.remove('active'));
+const aiBtn=document.querySelector('.sbtn:nth-child(7)');
+if(aiBtn)aiBtn.classList.add('active');
+}
+
+// ---- Keyboard shortcuts ----
+document.addEventListener('keydown',(e)=>{
+if(e.key==='Escape'){
+closeExportModal();
+}
+});
+
+// ---- Click outside modals ----
+document.getElementById('exportModal').addEventListener('click',(e)=>{
+if(e.target===document.getElementById('exportModal'))closeExportModal();
+});
+
+console.log('✦ I-CUT PRO by Mega Sonic loaded successfully');
+console.log('✦ Premium video editing platform');
+</script>
+</body>
+</html>
